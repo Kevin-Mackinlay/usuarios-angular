@@ -1,4 +1,19 @@
 <section>
     <h2>Lista de usuarios</h2>
-    <p>Los usuarios se cargaran desde JSONPlaceholder.</p>
+@if (usuarios$ | async; as usuarios){
+    <ul>
+        @for (usuario of usuarios; track usuario.id){
+            <li>
+                <strong>{{usuario.name}}</strong>
+                <p>{{usuario.email}}</p>
+            </li>
+        } @empty {
+            <li>No hay usuarios disponibles</li> 
+                
+            
+        }
+    </ul>
+} @else {
+    <p> Cargando usuarios...</p>
+}
 </section>
