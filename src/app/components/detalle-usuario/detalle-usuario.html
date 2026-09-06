@@ -1,0 +1,38 @@
+<section>
+    <h2>Detalle de Usuario</h2>
+
+
+@if (usuario$ | async; as usuario){
+    <h3>{{usuario.name}}</h3>
+
+<p> <strong>Usuario:</strong>
+    {{usuario.username}}</p>
+
+<p><strong>Email:</strong>
+    {{usuario.email}}</p>
+
+<p><strong>Telefono:</strong>
+    {{usuario.phone}}</p>
+
+<p><strong>Web:</strong>
+    {{usuario.website}}</p>
+
+
+
+
+
+
+}@else{
+    <p> Cargando usuario...</p>
+}
+
+</section>
+
+
+
+
+
+
+
+
+
