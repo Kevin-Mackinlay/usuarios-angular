@@ -1,13 +1,13 @@
 import  {AsyncPipe} from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs';
 
 import { UsuarioService } from '../../services/usuario.service';
 
 @Component({
   selector: 'app-detalle-usuario',
-  imports: [AsyncPipe],
+  imports: [AsyncPipe,RouterLink],
   templateUrl: './detalle-usuario.html',
   styleUrl: './detalle-usuario.css',
 })

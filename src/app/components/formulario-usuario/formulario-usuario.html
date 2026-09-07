@@ -1,0 +1,47 @@
+<section>
+    <h2>Nuevo Usuario</h2>
+    <Form [formGroup]="formularioUsuario"
+        (ngSubmit)="enviarFormulario()">
+        <div>
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" formControlName="nombre"/>
+
+@if (
+    formularioUsuario.controls.nombre.touched && formularioUsuario.controls.nombre.hasError('minlength')
+){
+    <p>El nombre debe tener al menos 3 caracteres</p>
+}
+
+        </div>
+
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" formControlName="email"/>
+
+            @if (
+                formularioUsuario.controls.email.touched && formularioUsuario.controls.email.hasError('requierd')
+            ) {
+                <p>El email es obligatorio.</p>
+            }
+
+            @if (
+                formularioUsuario.controls.email.touched && formularioUsuario.controls.email.hasError('email')
+            ) {
+                <p>El email debe ser valido.</p>
+            }
+        </div>
+<div>
+    <label for="telefono">Telefono:</label>
+    <input type="text" id="telefono" formControlName="telefono"/>
+
+</div>
+<button type="submit">Guardar Usuario</button>
+    </Form>
+    @if (formularioEnviado){
+        <p>El formulario ha sido enviado correctamente</p>        
+
+    }
+    <p>
+  <a routerLink="/usuarios">Volver a la lista</a>
+</p>
+</section>

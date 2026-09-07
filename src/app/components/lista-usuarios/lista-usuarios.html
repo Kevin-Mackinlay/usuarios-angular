@@ -1,5 +1,11 @@
 <section>
     <h2>Lista de usuarios</h2>
+
+<p>
+  <a routerLink="/usuarios/nuevo">Agregar nuevo usuario</a>
+</p>
+
+
 @if (usuarios$ | async; as usuarios){
     <ul>
         @for (usuario of usuarios; track usuario.id){
