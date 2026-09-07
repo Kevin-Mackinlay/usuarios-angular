@@ -6,6 +6,7 @@
             <li>
                 <strong>{{usuario.name}}</strong>
                 <p>{{usuario.email}}</p>
+                <a [routerLink]="['/usuarios', usuario.id]">Ver detalle</a>
             </li>
         } @empty {
             <li>No hay usuarios disponibles</li> 
