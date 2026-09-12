@@ -1,26 +1,40 @@
 <section>
-    <h2>Lista de usuarios</h2>
+  <h2>Lista de usuarios</h2>
 
-<p>
-  <a routerLink="/usuarios/nuevo">Agregar nuevo usuario</a>
-</p>
+  <p>
+    <a routerLink="/usuarios/nuevo">Agregar nuevo usuario</a>
+  </p>
 
+  @if (estado$ | async; as resultado) {
+    @switch (resultado.estado) {
+      @case ('cargando') {
+        <p>Cargando usuarios...</p>
+      }
 
-@if (usuarios$ | async; as usuarios){
-    <ul>
-        @for (usuario of usuarios; track usuario.id){
+      @case ('error') {
+        <p>No se pudieron cargar los usuarios.</p>
+
+        <button type="button" (click)="reintentar()">Reintentar</button>
+      }
+
+      @case ('exito') {
+        <ul>
+          @for (usuario of resultado.usuarios; track usuario.id) {
             <li>
-                <strong>{{usuario.name}}</strong>
-                <p>{{usuario.email}}</p>
-                <a [routerLink]="['/usuarios', usuario.id]">Ver detalle</a>
+              <strong>{{ usuario.name }}</strong>
+              <p>{{ usuario.email }}</p>
+
+              <a [routerLink]="['/usuarios', usuario.id]"> Ver detalle </a>
+
+              &nbsp;&nbsp;
+
+              <a [routerLink]="['/usuarios', usuario.id, 'editar']"> Editar </a>
             </li>
-        } @empty {
-            <li>No hay usuarios disponibles</li> 
-                
-            
-        }
-    </ul>
-} @else {
-    <p> Cargando usuarios...</p>
-}
+          } @empty {
+            <li>No hay usuarios disponibles.</li>
+          }
+        </ul>
+      }
+    }
+  }
 </section>

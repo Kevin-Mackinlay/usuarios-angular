@@ -20,6 +20,10 @@ export const routes: Routes = [
         component: FormularioUsuario
     },
     {
+        path: 'usuarios/:id/editar',
+        component: FormularioUsuario
+    },
+    {
         path: 'usuarios/:id',
         component: DetalleUsuario
     },

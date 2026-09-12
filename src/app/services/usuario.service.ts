@@ -20,4 +20,13 @@ getUsuario(id: number): Observable<Usuario> {
   return this.http.get<Usuario>(`${this.apiUrl}/${id}`);
 }
 
+actualizarUsuario(
+  id:number,
+  usuario: Partial<Usuario>
+):Observable<Usuario> {
+  return this.http.patch<Usuario>(`${this.apiUrl}/${id}`, usuario);   
+
+};
+
+
 }
