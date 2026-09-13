@@ -1,42 +1,53 @@
 <section>
-    <h2>Detalle de Usuario</h2>
+  <h1>Detalle de usuario</h1>
 
+  @if (estado$ | async; as resultado) {
+    @switch (resultado.estado) {
+      @case ('cargando') {
+        <p>Cargando usuario...</p>
+      }
 
-@if (usuario$ | async; as usuario){
-    <h3>{{usuario.name}}</h3>
+      @case ('exito') {
+        <h3>{{ resultado.usuario.name }}</h3>
 
-<p> <strong>Usuario:</strong>
-    {{usuario.username}}</p>
+        <p>
+          <strong>Usuario:</strong>
+          {{ resultado.usuario.username }}
+        </p>
 
-<p><strong>Email:</strong>
-    {{usuario.email}}</p>
+        <p>
+          <strong>Email:</strong>
+          {{ resultado.usuario.email }}
+        </p>
 
-<p><strong>Telefono:</strong>
-    {{usuario.phone}}</p>
+        <p>
+          <strong>Teléfono:</strong>
+          {{ resultado.usuario.phone }}
+        </p>
 
-<p><strong>Web:</strong>
-    {{usuario.website}}</p>
+        <p>
+          <strong>Web:</strong>
+          {{ resultado.usuario.website }}
+        </p>
+      }
 
+      @case ('no-encontrado') {
+        <p>El usuario solicitado no existe.</p>
+      }
 
+      @case ('id-invalido') {
+        <p>El ID del usuario no es válido.</p>
+      }
 
+      @case ('error') {
+        <p>No se pudo cargar el usuario.</p>
 
+        <button type="button" (click)="reintentar()">Reintentar</button>
+      }
+    }
+  }
 
-
-}@else{
-    <p> Cargando usuario...</p>
-}
-
-
-<p>
-  <a routerLink="/usuarios">Volver a la lista</a>
-</p>
+  <p>
+    <a routerLink="/usuarios">Volver a la lista</a>
+  </p>
 </section>
-
-
-
-
-
-
-
-
-
