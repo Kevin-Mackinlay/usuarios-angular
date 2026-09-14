@@ -1,18 +1,15 @@
 <section>
-  <h2>Nuevo Usuario</h2>
+  <h2>{{modoEdicion? 'Editar Usuario': 'Nuevo Usuario'}}</h2>
 
-  <form
-    [formGroup]="formularioUsuario"
-    (ngSubmit)="enviarFormulario()"
-  >
+  @if (cargandoUsuario) {
+    <p>Cargando datos del usuario...</p>
+  }
+
+  <form [formGroup]="formularioUsuario" (ngSubmit)="enviarFormulario()">
     <div>
       <label for="nombre">Nombre:</label>
 
-      <input
-        type="text"
-        id="nombre"
-        formControlName="nombre"
-      />
+      <input type="text" id="nombre" formControlName="nombre" />
 
       @if (
         formularioUsuario.controls.nombre.touched &&
@@ -32,11 +29,7 @@
     <div>
       <label for="email">Email:</label>
 
-      <input
-        type="email"
-        id="email"
-        formControlName="email"
-      />
+      <input type="email" id="email" formControlName="email" />
 
       @if (
         formularioUsuario.controls.email.touched &&
@@ -56,18 +49,15 @@
     <div>
       <label for="telefono">Teléfono:</label>
 
-      <input
-        type="text"
-        id="telefono"
-        formControlName="telefono"
-      />
+      <input type="text" id="telefono" formControlName="telefono" />
     </div>
-
-    <button type="submit" [disabled]="enviando">
+    <button type="submit" [disabled]="enviando || cargandoUsuario">
       @if (enviando) {
         Guardando...
+      } @else if (modoEdicion) {
+        Guardar cambios
       } @else {
-        Guardar Usuario
+        Crear usuario
       }
     </button>
   </form>

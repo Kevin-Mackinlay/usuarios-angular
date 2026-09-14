@@ -1,6 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, inject, OnInit } from '@angular/core';
+
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+
+import { ActivatedRoute, RouterLink } from '@angular/router';
+
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+import { catchError, EMPTY, finalize, switchMap } from 'rxjs';
 
 import { UsuarioService } from '../../services/usuario.service';
 
@@ -10,44 +16,134 @@ import { UsuarioService } from '../../services/usuario.service';
   templateUrl: './formulario-usuario.html',
   styleUrl: './formulario-usuario.css',
 })
-export class FormularioUsuario {
+export class FormularioUsuario implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly usuarioService = inject(UsuarioService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
 
-  //aca tambien tengo dudas
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
+
   readonly formularioUsuario = this.formBuilder.nonNullable.group({
     nombre: ['', [Validators.required, Validators.minLength(3)]],
+
     email: ['', [Validators.required, Validators.email]],
+
     telefono: [''],
   });
 
+  modoEdicion = false;
+  usuarioId: number | null = null;
+
+  cargandoUsuario = false;
   enviando = false;
+
   mensajeExito = '';
   mensajeError = '';
+
+  ngOnInit(): void {
+    this.route.paramMap
+      .pipe(
+        switchMap((params) => {
+          const valorId = params.get('id');
+
+          // Si no existe ID, estamos creando un usuario.
+          if (valorId === null) {
+            this.modoEdicion = false;
+            this.usuarioId = null;
+
+            return EMPTY;
+          }
+
+          // Si existe ID, estamos editando.
+          this.modoEdicion = true;
+
+          const id = Number(valorId);
+
+          if (!Number.isInteger(id) || id <= 0) {
+            this.mensajeError = 'El ID del usuario no es válido.';
+
+            return EMPTY;
+          }
+
+          this.usuarioId = id;
+          this.cargandoUsuario = true;
+
+          return this.usuarioService.getUsuario(id).pipe(
+            catchError(() => {
+              this.mensajeError = 'No se pudo cargar el usuario.';
+
+              return EMPTY;
+            }),
+
+            finalize(() => {
+              this.cargandoUsuario = false;
+
+              this.changeDetectorRef.markForCheck();
+            }),
+          );
+        }),
+
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((usuario) => {
+        this.formularioUsuario.patchValue({
+          nombre: usuario.name,
+          email: usuario.email,
+          telefono: usuario.phone,
+        });
+      });
+  }
 
   enviarFormulario(): void {
     this.mensajeExito = '';
     this.mensajeError = '';
+
     if (this.formularioUsuario.invalid) {
       this.formularioUsuario.markAllAsTouched();
       return;
     }
-    this.enviando = true;
 
     const datos = this.formularioUsuario.getRawValue();
 
-    this.usuarioService.crearUsuario(datos).subscribe({
-      next: (usuarioCreado) => {
-        this.mensajeExito = `El usuario ${usuarioCreado.name} fue creado correctamente`;
+    if (this.modoEdicion && this.usuarioId === null) {
+      this.mensajeError = 'No se puede actualizar porque el ID no es válido.';
 
-        this.formularioUsuario.reset();
-        this.enviando = false;
-      },
-      error: (error) => {
-        this.mensajeError = 'No se pudo crear el usuario. Intente de nuevo.';
+      return;
+    }
 
-        this.enviando = false;
-      },
-    });
+    this.enviando = true;
+
+    const peticion$ = this.modoEdicion
+      ? this.usuarioService.actualizarUsuario(this.usuarioId!, datos)
+      : this.usuarioService.crearUsuario(datos);
+
+    peticion$
+      .pipe(
+        finalize(() => {
+          this.enviando = false;
+
+          this.changeDetectorRef.markForCheck();
+        }),
+      )
+      .subscribe({
+        next: (usuarioGuardado) => {
+          this.mensajeExito = this.modoEdicion
+            ? `El usuario ${usuarioGuardado.name} fue actualizado correctamente.`
+            : `El usuario ${usuarioGuardado.name} fue creado correctamente.`;
+
+          // Solamente vaciamos el formulario
+          // cuando estamos creando.
+          if (!this.modoEdicion) {
+            this.formularioUsuario.reset();
+          }
+        },
+
+        error: () => {
+          this.mensajeError = this.modoEdicion
+            ? 'No se pudo actualizar el usuario. Intentá nuevamente.'
+            : 'No se pudo crear el usuario. Intentá nuevamente.';
+        },
+      });
   }
 }
