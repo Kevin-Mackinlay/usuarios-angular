@@ -2,8 +2,16 @@
   <h2>Lista de usuarios</h2>
 
   <p>
-    <a routerLink="/usuarios/nuevo">Agregar nuevo usuario</a>
+    <a routerLink="/usuarios/nuevo"> Agregar nuevo usuario </a>
   </p>
+
+  @if (mensajeEliminacion) {
+    <p>{{ mensajeEliminacion }}</p>
+  }
+
+  @if (mensajeErrorEliminacion) {
+    <p>{{ mensajeErrorEliminacion }}</p>
+  }
 
   @if (estado$ | async; as resultado) {
     @switch (resultado.estado) {
@@ -22,6 +30,7 @@
           @for (usuario of resultado.usuarios; track usuario.id) {
             <li>
               <strong>{{ usuario.name }}</strong>
+
               <p>{{ usuario.email }}</p>
 
               <a [routerLink]="['/usuarios', usuario.id]"> Ver detalle </a>
@@ -29,6 +38,21 @@
               &nbsp;&nbsp;
 
               <a [routerLink]="['/usuarios', usuario.id, 'editar']"> Editar </a>
+
+              &nbsp;&nbsp;
+
+              <button type="button" (click)="abrirDialogoEliminacion(usuario)">Eliminar</button>
+
+              @if (usuarioSeleccionado; as seleccionado) {
+                @if (seleccionado.id === usuario.id) {
+                  <app-dialogo-confirmacion
+                    [nombreUsuario]="seleccionado.name"
+                    [eliminando]="eliminando"
+                    (confirmar)="confirmarEliminacion()"
+                    (cancelar)="cancelarEliminacion()"
+                  />
+                }
+              }
             </li>
           } @empty {
             <li>No hay usuarios disponibles.</li>
