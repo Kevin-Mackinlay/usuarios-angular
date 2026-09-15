@@ -10,6 +10,8 @@ import { catchError, EMPTY, finalize, switchMap } from 'rxjs';
 
 import { UsuarioService } from '../../services/usuario.service';
 
+import { noSoloEspaciosValidator } from '../../validators/no-solo-espacios.validator';
+
 @Component({
   selector: 'app-formulario-usuario',
   imports: [ReactiveFormsModule, RouterLink],
@@ -25,7 +27,7 @@ export class FormularioUsuario implements OnInit {
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   readonly formularioUsuario = this.formBuilder.nonNullable.group({
-    nombre: ['', [Validators.required, Validators.minLength(3)]],
+    nombre: ['', [Validators.required, Validators.minLength(3), noSoloEspaciosValidator]],
 
     email: ['', [Validators.required, Validators.email]],
 

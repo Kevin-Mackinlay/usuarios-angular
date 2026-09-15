@@ -1,5 +1,5 @@
 <section>
-  <h2>{{modoEdicion? 'Editar Usuario': 'Nuevo Usuario'}}</h2>
+  <h2>{{ modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario' }}</h2>
 
   @if (cargandoUsuario) {
     <p>Cargando datos del usuario...</p>
@@ -20,7 +20,15 @@
 
       @if (
         formularioUsuario.controls.nombre.touched &&
-        formularioUsuario.controls.nombre.hasError('minlength')
+        formularioUsuario.controls.nombre.hasError('soloEspacios')
+      ) {
+        <p>El nombre no puede contener solamente espacios.</p>
+      }
+
+      @if (
+        formularioUsuario.controls.nombre.touched &&
+        formularioUsuario.controls.nombre.hasError('minlength') &&
+        !formularioUsuario.controls.nombre.hasError('soloEspacios')
       ) {
         <p>El nombre debe tener al menos 3 caracteres.</p>
       }
@@ -51,6 +59,7 @@
 
       <input type="text" id="telefono" formControlName="telefono" />
     </div>
+
     <button type="submit" [disabled]="enviando || cargandoUsuario">
       @if (enviando) {
         Guardando...
