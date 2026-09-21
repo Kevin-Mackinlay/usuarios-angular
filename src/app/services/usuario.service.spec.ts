@@ -81,7 +81,7 @@ describe('UsuarioService', () => {
   });
 
   it('debe eliminar un usuario con DELETE', () => {
-    service.eliminarUsuario(4).subscribe();
+    service.eliminarUsuario('4').subscribe();
 
     const peticion = httpTesting.expectOne(`${apiUrl}/4`);
 
