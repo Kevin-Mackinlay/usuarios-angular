@@ -54,10 +54,27 @@
       }
     </div>
 
+    
     <div>
       <label for="telefono">Teléfono:</label>
 
-      <input type="text" id="telefono" formControlName="telefono" />
+      <input type="tel" inputmode="tel" id="telefono" formControlName="telefono" />
+
+      @if (
+        (formularioUsuario.controls.telefono.dirty ||
+          formularioUsuario.controls.telefono.touched) &&
+        formularioUsuario.controls.telefono.hasError('pattern')
+      ) {
+        <p>El formato del teléfono no es válido.</p>
+      }
+
+      @if (
+        formularioUsuario.controls.telefono.dirty &&
+        formularioUsuario.controls.telefono.valid &&
+        formularioUsuario.controls.telefono.value !== ''
+      ) {
+        <p>El teléfono es válido.</p>
+      }
     </div>
 
     <button type="submit" [disabled]="enviando || cargandoUsuario">

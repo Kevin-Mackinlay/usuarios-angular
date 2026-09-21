@@ -31,7 +31,7 @@ export class FormularioUsuario implements OnInit {
 
     email: ['', [Validators.required, Validators.email]],
 
-    telefono: [''],
+    telefono: ['', [Validators.pattern(/^[0-9+().\-\sx]+$/i)]],
   });
 
   modoEdicion = false;
@@ -44,6 +44,11 @@ export class FormularioUsuario implements OnInit {
   mensajeError = '';
 
   ngOnInit(): void {
+    this.formularioUsuario.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.mensajeExito = '';
+      this.mensajeError = '';
+    });
+
     this.route.paramMap
       .pipe(
         switchMap((params) => {
@@ -89,11 +94,16 @@ export class FormularioUsuario implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((usuario) => {
-        this.formularioUsuario.patchValue({
-          nombre: usuario.name,
-          email: usuario.email,
-          telefono: usuario.phone,
-        });
+        this.formularioUsuario.patchValue(
+          {
+            nombre: usuario.name,
+            email: usuario.email,
+            telefono: usuario.phone,
+          },
+          {
+            emitEvent: false,
+          },
+        );
       });
   }
 
@@ -137,7 +147,16 @@ export class FormularioUsuario implements OnInit {
           // Solamente vaciamos el formulario
           // cuando estamos creando.
           if (!this.modoEdicion) {
-            this.formularioUsuario.reset();
+            this.formularioUsuario.reset(
+              {
+                nombre: '',
+                email: '',
+                telefono: '',
+              },
+              {
+                emitEvent: false,
+              },
+            );
           }
         },
 
