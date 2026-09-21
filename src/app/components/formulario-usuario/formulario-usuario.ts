@@ -35,7 +35,7 @@ export class FormularioUsuario implements OnInit {
   });
 
   modoEdicion = false;
-  usuarioId: number | null = null;
+  usuarioId: string | null = null;
 
   cargandoUsuario = false;
   enviando = false;
@@ -65,13 +65,12 @@ export class FormularioUsuario implements OnInit {
           // Si existe ID, estamos editando.
           this.modoEdicion = true;
 
-          const id = Number(valorId);
+         const id = valorId.trim();
 
-          if (!Number.isInteger(id) || id <= 0) {
-            this.mensajeError = 'El ID del usuario no es válido.';
-
-            return EMPTY;
-          }
+         if (id === '') {
+           this.mensajeError = 'El ID del usuario no es válido.';
+           return EMPTY;
+         }
 
           this.usuarioId = id;
           this.cargandoUsuario = true;

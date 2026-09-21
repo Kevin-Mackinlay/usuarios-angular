@@ -1,6 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, updateDoc} from 'firebase/firestore';  
+
+import { Observable, from, map } from 'rxjs';
+import {db} from '../firebase.config';
 import { Usuario } from '../models/usuario';
 import { DatosUsuarioFormulario } from '../models/datos-usuario-formulario';
 
@@ -10,31 +12,84 @@ type DatosUsuarioApi = Pick<Usuario, 'name' | 'email' | 'phone'>;
 @Injectable({
   providedIn: 'root',
 })
+
+
 export class UsuarioService {
-  private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'https://jsonplaceholder.typicode.com/users';
+  private readonly usuariosCollection = collection(db, 'usuarios');
 
   getUsuarios(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(this.apiUrl);
+    return new Observable<Usuario[]>((subscriber) => {
+      const cancelarEscucha = onSnapshot(
+        this.usuariosCollection,
+
+        (snapshot) => {
+          const usuarios = snapshot.docs.map((documento) => ({
+            ...(documento.data() as Omit<Usuario, 'id'>),
+            id: documento.id,
+          }));
+
+          subscriber.next(usuarios);
+        },
+
+        (error) => {
+          subscriber.error(error);
+        },
+      );
+
+      return () => {
+        cancelarEscucha();
+      };
+    });
   }
 
-  getUsuario(id: number): Observable<Usuario> {
-    return this.http.get<Usuario>(`${this.apiUrl}/${id}`);
+  getUsuario(id: string): Observable<Usuario> {
+    const usuarioDocumento = doc(db, 'usuarios', id);
+
+    return from(getDoc(usuarioDocumento)).pipe(
+      map((snapshot) => {
+        if (!snapshot.exists()) {
+          throw new Error('El usuario no existe.');
+        }
+
+        return {
+          ...(snapshot.data() as Omit<Usuario, 'id'>),
+          id: snapshot.id,
+        };
+      }),
+    );
   }
+
   crearUsuario(datos: DatosUsuarioFormulario): Observable<Usuario> {
-    const usuarioApi = this.mapearDatos(datos);
+    const usuario = this.mapearDatos(datos);
 
-    return this.http.post<Usuario>(this.apiUrl, usuarioApi);
+    return from(addDoc(this.usuariosCollection, usuario)).pipe(
+      map((documentoCreado) => ({
+        ...usuario,
+        id: documentoCreado.id,
+      })),
+    );
   }
 
-  actualizarUsuario(id: number, datos: DatosUsuarioFormulario): Observable<Usuario> {
-    return this.http.patch<Usuario>(`${this.apiUrl}/${id}`, this.mapearDatos(datos));
+  actualizarUsuario(id: string, datos: DatosUsuarioFormulario): Observable<Usuario> {
+    const usuario = this.mapearDatos(datos);
+
+    const usuarioDocumento = doc(db, 'usuarios', id);
+
+    return from(updateDoc(usuarioDocumento, usuario)).pipe(
+      map(() => ({
+        ...usuario,
+        id,
+      })),
+    );
   }
+
   eliminarUsuario(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    const usuarioDocumento = doc(db, 'usuarios', id);
+
+    return from(deleteDoc(usuarioDocumento));
   }
 
-  private mapearDatos(datos: DatosUsuarioFormulario): DatosUsuarioApi {
+  private mapearDatos(datos: DatosUsuarioFormulario): Omit<Usuario, 'id'> {
     return {
       name: datos.nombre,
       email: datos.email,
