@@ -30,7 +30,7 @@ export class UsuarioService {
   actualizarUsuario(id: number, datos: DatosUsuarioFormulario): Observable<Usuario> {
     return this.http.patch<Usuario>(`${this.apiUrl}/${id}`, this.mapearDatos(datos));
   }
-  eliminarUsuario(id: number): Observable<void> {
+  eliminarUsuario(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 

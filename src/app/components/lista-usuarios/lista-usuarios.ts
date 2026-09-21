@@ -23,7 +23,7 @@ export class ListaUsuarios {
 
   private readonly recargar$ = new Subject<void>();
 
-  private readonly idsEliminados = new Set<number>();
+  private readonly idsEliminados = new Set<string>();
 
   usuarioSeleccionado: Usuario | null = null;
   eliminando = false;
