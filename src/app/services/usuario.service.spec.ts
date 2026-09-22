@@ -1,111 +1,133 @@
-import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
+import { addDoc, collection, deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { firstValueFrom } from 'rxjs';
 
-import { TestBed } from '@angular/core/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { UsuarioService } from './usuario.service';
 
+vi.mock('firebase/app', () => ({
+  initializeApp: vi.fn(() => ({})),
+}));
+
+vi.mock('firebase/firestore', () => ({
+  addDoc: vi.fn(),
+  collection: vi.fn(),
+  deleteDoc: vi.fn(),
+  doc: vi.fn(),
+  getDoc: vi.fn(),
+  getFirestore: vi.fn(() => ({})),
+  onSnapshot: vi.fn(),
+  updateDoc: vi.fn(),
+}));
+
 describe('UsuarioService', () => {
   let service: UsuarioService;
-  let httpTesting: HttpTestingController;
 
-  const apiUrl = 'https://jsonplaceholder.typicode.com/users';
+  const referenciaColeccion = {
+    tipo: 'coleccion',
+  };
+
+  const referenciaDocumento = {
+    tipo: 'documento',
+  };
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [UsuarioService, provideHttpClient(), provideHttpClientTesting()],
-    });
+    vi.clearAllMocks();
 
-    service = TestBed.inject(UsuarioService);
+    vi.mocked(collection).mockReturnValue(referenciaColeccion as never);
 
-    httpTesting = TestBed.inject(HttpTestingController);
+    vi.mocked(doc).mockReturnValue(referenciaDocumento as never);
+
+    service = new UsuarioService();
   });
 
-  afterEach(() => {
-    httpTesting.verify();
-  });
-
-  it('debe crear un usuario con POST y mapear el body', () => {
+  it('debe crear un usuario en Firestore', async () => {
     const datos = {
       nombre: 'Kevin',
       email: 'kevin@email.com',
-      telefono: '123456',
+      telefono: '2920123456',
     };
 
-    service.crearUsuario(datos).subscribe();
+    vi.mocked(addDoc).mockResolvedValue({
+      id: 'usuario-1',
+    } as never);
 
-    const peticion = httpTesting.expectOne(apiUrl);
+    const resultado = await firstValueFrom(service.crearUsuario(datos));
 
-    expect(peticion.request.method).toBe('POST');
-
-    expect(peticion.request.body).toEqual({
+    expect(addDoc).toHaveBeenCalledWith(referenciaColeccion, {
       name: 'Kevin',
       email: 'kevin@email.com',
-      phone: '123456',
+      phone: '2920123456',
     });
 
-    peticion.flush({
-      id: 11,
+    expect(resultado).toEqual({
+      id: 'usuario-1',
       name: 'Kevin',
       email: 'kevin@email.com',
-      phone: '123456',
+      phone: '2920123456',
     });
   });
 
-  it('debe actualizar un usuario con PATCH y mapear el body', () => {
+  it('debe actualizar un usuario en Firestore', async () => {
     const datos = {
       nombre: 'Kevin actualizado',
       email: 'actualizado@email.com',
-      telefono: '654321',
+      telefono: '2920654321',
     };
 
-    service.actualizarUsuario(3, datos).subscribe();
+    vi.mocked(updateDoc).mockResolvedValue(undefined);
 
-    const peticion = httpTesting.expectOne(`${apiUrl}/3`);
+    const resultado = await firstValueFrom(service.actualizarUsuario('usuario-3', datos));
 
-    expect(peticion.request.method).toBe('PATCH');
+    expect(doc).toHaveBeenCalledWith(expect.anything(), 'usuarios', 'usuario-3');
 
-    expect(peticion.request.body).toEqual({
+    expect(updateDoc).toHaveBeenCalledWith(referenciaDocumento, {
       name: 'Kevin actualizado',
       email: 'actualizado@email.com',
-      phone: '654321',
+      phone: '2920654321',
     });
 
-    peticion.flush({
-      id: 3,
+    expect(resultado).toEqual({
+      id: 'usuario-3',
       name: 'Kevin actualizado',
       email: 'actualizado@email.com',
-      phone: '654321',
+      phone: '2920654321',
     });
   });
 
-  it('debe eliminar un usuario con DELETE', () => {
-    service.eliminarUsuario('4').subscribe();
+  it('debe eliminar un usuario de Firestore', async () => {
+    vi.mocked(deleteDoc).mockResolvedValue(undefined);
 
-    const peticion = httpTesting.expectOne(`${apiUrl}/4`);
+    await firstValueFrom(service.eliminarUsuario('usuario-4'));
 
-    expect(peticion.request.method).toBe('DELETE');
+    expect(doc).toHaveBeenCalledWith(expect.anything(), 'usuarios', 'usuario-4');
 
-    peticion.flush(null);
+    expect(deleteDoc).toHaveBeenCalledWith(referenciaDocumento);
   });
 
-  it('debe recibir el error cuando el servidor responde 500', () => {
-    let errorRecibido: HttpErrorResponse | undefined;
+  it('debe obtener un usuario de Firestore', async () => {
+    vi.mocked(getDoc).mockResolvedValue({
+      exists: () => true,
 
-    service.getUsuarios().subscribe({
-      error: (error: HttpErrorResponse) => {
-        errorRecibido = error;
-      },
+      data: () => ({
+        name: 'Kevin',
+        email: 'kevin@email.com',
+        phone: '2920123456',
+      }),
+
+      id: 'usuario-5',
+    } as never);
+
+    const resultado = await firstValueFrom(service.getUsuario('usuario-5'));
+
+    expect(doc).toHaveBeenCalledWith(expect.anything(), 'usuarios', 'usuario-5');
+
+    expect(resultado).toEqual({
+      id: 'usuario-5',
+      name: 'Kevin',
+      email: 'kevin@email.com',
+      phone: '2920123456',
     });
-
-    const peticion = httpTesting.expectOne(apiUrl);
-
-    peticion.flush('Error del servidor', {
-      status: 500,
-      statusText: 'Internal Server Error',
-    });
-
-    expect(errorRecibido?.status).toBe(500);
   });
 });
