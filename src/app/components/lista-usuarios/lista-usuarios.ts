@@ -23,8 +23,6 @@ export class ListaUsuarios {
 
   private readonly recargar$ = new Subject<void>();
 
-  private readonly idsEliminados = new Set<string>();
-
   usuarioSeleccionado: Usuario | null = null;
   eliminando = false;
 
@@ -38,7 +36,7 @@ export class ListaUsuarios {
       this.usuarioService.getUsuarios().pipe(
         map((usuarios): EstadoLista => ({
           estado: 'exito',
-          usuarios: usuarios.filter((usuario) => !this.idsEliminados.has(usuario.id)),
+          usuarios,
         })),
 
         startWith({
@@ -86,14 +84,11 @@ export class ListaUsuarios {
       )
       .subscribe({
         next: () => {
-          this.idsEliminados.add(usuario.id);
-
           this.mensajeEliminacion = `El usuario ${usuario.name} fue eliminado correctamente.`;
 
           this.usuarioSeleccionado = null;
-
-          this.recargar$.next();
         },
+
         error: () => {
           this.mensajeErrorEliminacion = 'No se pudo eliminar el usuario. Intentá nuevamente.';
         },
