@@ -1,1 +1,51 @@
-<p>lista-autos works!</p>
+<section>
+  <h2>Lista de autos</h2>
+
+  <p>
+    <a routerLink="/autos/nuevo">Agregar nuevo auto</a>
+  </p>
+
+  @if (estado$ | async; as resultado) {
+    @switch (resultado.estado) {
+      @case ('cargando') {
+        <p>Cargando autos...</p>
+      }
+
+      @case ('error') {
+        <p>No se pudieron cargar los autos.</p>
+
+        <button type="button" (click)="reintentar()">
+          Reintentar
+        </button>
+      }
+
+      @case ('exito') {
+        <ul>
+          @for (auto of resultado.autos; track auto.id) {
+            <li>
+              <strong>{{ auto.marca }} {{ auto.modelo }}</strong>
+
+              <p>Año: {{ auto.anio }}</p>
+
+              <p>Patente: {{ auto.patente }}</p>
+
+              <p>Color: {{ auto.color }}</p>
+
+              <a [routerLink]="['/autos', auto.id]">
+                Ver detalle
+              </a>
+
+              &nbsp;&nbsp;
+
+              <a [routerLink]="['/autos', auto.id, 'editar']">
+                Editar
+              </a>
+            </li>
+          } @empty {
+            <li>No hay autos disponibles.</li>
+          }
+        </ul>
+      }
+    }
+  }
+</section>
