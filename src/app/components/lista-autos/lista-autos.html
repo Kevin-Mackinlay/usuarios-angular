@@ -5,6 +5,14 @@
     <a routerLink="/autos/nuevo">Agregar nuevo auto</a>
   </p>
 
+  @if (mensajeEliminacion) {
+    <p>{{ mensajeEliminacion }}</p>
+  }
+
+  @if (mensajeErrorEliminacion) {
+    <p>{{ mensajeErrorEliminacion }}</p>
+  }
+
   @if (estado$ | async; as resultado) {
     @switch (resultado.estado) {
       @case ('cargando') {
@@ -26,9 +34,7 @@
               <strong>{{ auto.marca }} {{ auto.modelo }}</strong>
 
               <p>Año: {{ auto.anio }}</p>
-
               <p>Patente: {{ auto.patente }}</p>
-
               <p>Color: {{ auto.color }}</p>
 
               <a [routerLink]="['/autos', auto.id]">
@@ -40,6 +46,18 @@
               <a [routerLink]="['/autos', auto.id, 'editar']">
                 Editar
               </a>
+
+              &nbsp;&nbsp;
+
+              <button
+                type="button"
+                [disabled]="
+                  eliminando && autoSeleccionado?.id === auto.id
+                "
+                (click)="abrirDialogoEliminacion(auto)"
+              >
+                Eliminar
+              </button>
             </li>
           } @empty {
             <li>No hay autos disponibles.</li>
@@ -47,5 +65,17 @@
         </ul>
       }
     }
+  }
+
+  @if (autoSeleccionado; as autoAEliminar) {
+    <app-dialogo-confirmacion
+      titulo="Eliminar auto"
+      [nombreElemento]="
+        autoAEliminar.marca + ' ' + autoAEliminar.modelo
+      "
+      [eliminando]="eliminando"
+      (confirmar)="confirmarEliminacion()"
+      (cancelar)="cancelarEliminacion()"
+    />
   }
 </section>
