@@ -1,1 +1,60 @@
-<p>detalle-auto works!</p>
+<section>
+  <h2>Detalle del auto</h2>
+
+  @if (estado$ | async; as resultado) {
+    @switch (resultado.estado) {
+      @case ('cargando') {
+        <p>Cargando datos del auto...</p>
+      }
+
+      @case ('error') {
+        <p>No se pudo cargar el auto.</p>
+
+        <button type="button" (click)="reintentar()">
+          Reintentar
+        </button>
+
+        <p>
+          <a routerLink="/autos">Volver a la lista</a>
+        </p>
+      }
+
+      @case ('exito') {
+        <article>
+          <h3>{{ resultado.auto.marca }} {{ resultado.auto.modelo }}</h3>
+
+          <p>
+            <strong>Año:</strong>
+            {{ resultado.auto.anio }}
+          </p>
+
+          <p>
+            <strong>Patente:</strong>
+            {{ resultado.auto.patente }}
+          </p>
+
+          <p>
+            <strong>Color:</strong>
+            {{ resultado.auto.color }}
+          </p>
+
+          <p>
+            <a
+              [routerLink]="[
+                '/autos',
+                resultado.auto.id,
+                'editar'
+              ]"
+            >
+              Editar auto
+            </a>
+          </p>
+
+          <p>
+            <a routerLink="/autos">Volver a la lista</a>
+          </p>
+        </article>
+      }
+    }
+  }
+</section>

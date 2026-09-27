@@ -106,7 +106,9 @@
           }
         </button>
 
-        <a routerLink="/autos">Cancelar</a>
+      <a routerLink="/autos">
+  {{ modoEdicion ? 'Cancelar' : 'Volver a la lista' }}
+</a>
       </div>
     </form>
   }

@@ -5,41 +5,45 @@ import { FormularioUsuario } from './components/formulario-usuario/formulario-us
 import { ListaUsuarios } from './components/lista-usuarios/lista-usuarios';
 import {ListaAutos} from './components/lista-autos/lista-autos';
 import { FormularioAuto } from './components/formulario-auto/formulario-auto';
+import { DetalleAuto } from './components/detalle-auto/detalle-auto';
 
 
 export const routes: Routes = [
-    {
-        path: '',
-        redirectTo: 'usuarios',
-        pathMatch: 'full'
-    },
-    {
-        path: 'usuarios',
-        component: ListaUsuarios
-    },
-    {
-        path: 'usuarios/nuevo',
-        component: FormularioUsuario
-    },
-    {
-        path: 'usuarios/:id/editar',
-        component: FormularioUsuario
-    },
-    {
-        path: 'usuarios/:id',
-        component: DetalleUsuario
-    },
-    {
-        path: 'autos/nuevo',
-        component: FormularioAuto
-    },
-    {
-        path: 'autos/:id/editar',
-        component: FormularioAuto
-    },
-    {
-        path: 'autos',
-        component: ListaAutos
-    },
-    
+  {
+    path: '',
+    redirectTo: 'usuarios',
+    pathMatch: 'full',
+  },
+  {
+    path: 'usuarios',
+    component: ListaUsuarios,
+  },
+  {
+    path: 'usuarios/nuevo',
+    component: FormularioUsuario,
+  },
+  {
+    path: 'usuarios/:id/editar',
+    component: FormularioUsuario,
+  },
+  {
+    path: 'usuarios/:id',
+    component: DetalleUsuario,
+  },
+  {
+    path: 'autos/nuevo',
+    component: FormularioAuto,
+  },
+  {
+    path: 'autos/:id/editar',
+    component: FormularioAuto,
+  },
+  {
+    path: 'autos/:id',
+    component: DetalleAuto,
+  },
+  {
+    path: 'autos',
+    component: ListaAutos,
+  },
 ];
