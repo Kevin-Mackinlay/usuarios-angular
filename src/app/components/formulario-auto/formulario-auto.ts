@@ -1,4 +1,5 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
+
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -17,6 +18,7 @@ export class FormularioAuto implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly autoService = inject(AutoService);
   private readonly route = inject(ActivatedRoute);
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   readonly anioMaximo = new Date().getFullYear() + 1;
 
@@ -30,11 +32,14 @@ export class FormularioAuto implements OnInit {
 
   formulario = this.formBuilder.nonNullable.group({
     marca: ['', [Validators.required, Validators.minLength(2), Validators.pattern(/\S/)]],
+
     modelo: ['', [Validators.required, Validators.minLength(1), Validators.pattern(/\S/)]],
+
     anio: [
       new Date().getFullYear(),
       [Validators.required, Validators.min(1900), Validators.max(this.anioMaximo)],
     ],
+
     patente: [
       '',
       [
@@ -42,6 +47,7 @@ export class FormularioAuto implements OnInit {
         Validators.pattern(/^([A-Za-z]{3}\s?\d{3}|[A-Za-z]{2}\s?\d{3}\s?[A-Za-z]{2})$/),
       ],
     ],
+
     color: ['', [Validators.required, Validators.minLength(2), Validators.pattern(/\S/)]],
   });
 
@@ -61,7 +67,12 @@ export class FormularioAuto implements OnInit {
           this.cargandoAuto = true;
           this.mensajeError = '';
 
-          return this.autoService.getAuto(id).pipe(finalize(() => (this.cargandoAuto = false)));
+          return this.autoService.getAuto(id).pipe(
+            finalize(() => {
+              this.cargandoAuto = false;
+              this.changeDetectorRef.detectChanges();
+            }),
+          );
         }),
       )
       .subscribe({
@@ -74,6 +85,7 @@ export class FormularioAuto implements OnInit {
             color: auto.color,
           });
         },
+
         error: () => {
           this.mensajeError = 'No se pudo cargar el auto.';
         },
@@ -107,29 +119,42 @@ export class FormularioAuto implements OnInit {
 
     this.guardando = true;
 
-    operacion$.pipe(finalize(() => (this.guardando = false))).subscribe({
-      next: () => {
-        this.mensajeExito = this.modoEdicion
-          ? 'Auto actualizado correctamente.'
-          : 'Auto creado correctamente.';
+    operacion$
+      .pipe(
+        finalize(() => {
+          this.guardando = false;
+          this.changeDetectorRef.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.mensajeExito = this.modoEdicion
+            ? 'Auto actualizado correctamente.'
+            : 'Auto creado correctamente.';
 
-        if (!this.modoEdicion) {
-          this.formulario.reset({
-            marca: '',
-            modelo: '',
-            anio: new Date().getFullYear(),
-            patente: '',
-            color: '',
-          });
+           setTimeout(() => {
+             this.mensajeExito = '';
+             this.changeDetectorRef.detectChanges();
+           }, 3000); 
 
-          this.formularioEnviado = false;
-        }
-      },
-      error: () => {
-        this.mensajeError = this.modoEdicion
-          ? 'No se pudo actualizar el auto.'
-          : 'No se pudo crear el auto.';
-      },
-    });
+          if (!this.modoEdicion) {
+            this.formulario.reset({
+              marca: '',
+              modelo: '',
+              anio: new Date().getFullYear(),
+              patente: '',
+              color: '',
+            });
+
+            this.formularioEnviado = false;
+          }
+        },
+
+        error: () => {
+          this.mensajeError = this.modoEdicion
+            ? 'No se pudo actualizar el auto.'
+            : 'No se pudo crear el auto.';
+        },
+      });
   }
 }

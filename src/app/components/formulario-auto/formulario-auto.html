@@ -1,1 +1,121 @@
-<p>formulario-auto works!</p>
+<section class="formulario-auto">
+    <h2>{{ modoEdicion ? 'Editar Auto' : 'Nuevo Auto' }}</h2>
+@if (cargandoAuto) {
+    <p> Cargando datos del auto...</p>
+
+}@else{
+    <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+        <div>
+            <label for = "marca">Marca:</label>
+
+            <input
+            id="marca"
+            type="text"
+            formControlName="marca"
+            placeholder="Ejemplo: Ford"
+            />
+ @if (
+          (formulario.controls.marca.touched || formularioEnviado) &&
+          formulario.controls.marca.invalid
+        ) {
+          <small>Ingresá una marca válida de al menos 2 caracteres.</small>
+        }
+      </div>
+
+<div>
+        <label for="modelo">Modelo</label>
+
+        <input
+          id="modelo"
+          type="text"
+          formControlName="modelo"
+          placeholder="Ejemplo: Ranger"
+        />
+
+        @if (
+          (formulario.controls.modelo.touched || formularioEnviado) &&
+          formulario.controls.modelo.invalid
+        ) {
+          <small>Ingresá el modelo del auto.</small>
+        }
+      </div>
+
+       <div>
+        <label for="anio">Año</label>
+
+        <input
+          id="anio"
+          type="number"
+          formControlName="anio"
+          min="1900"
+          [max]="anioMaximo"
+        />
+
+        @if (
+          (formulario.controls.anio.touched || formularioEnviado) &&
+          formulario.controls.anio.invalid
+        ) {
+          <small>Ingresá un año entre 1900 y {{ anioMaximo }}.</small>
+        }
+      </div>
+
+       <div>
+        <label for="patente">Patente</label>
+
+        <input
+          id="patente"
+          type="text"
+          formControlName="patente"
+          placeholder="Ejemplo: AB123CD o ABC123"
+        />
+
+        @if (
+          (formulario.controls.patente.touched || formularioEnviado) &&
+          formulario.controls.patente.invalid
+        ) {
+          <small>
+            Ingresá una patente válida, por ejemplo AB123CD o ABC123.
+          </small>
+        }
+      </div>
+
+        <div>
+        <label for="color">Color</label>
+
+        <input
+          id="color"
+          type="text"
+          formControlName="color"
+          placeholder="Ejemplo: Negro"
+        />
+
+        @if (
+          (formulario.controls.color.touched || formularioEnviado) &&
+          formulario.controls.color.invalid
+        ) {
+          <small>Ingresá un color válido.</small>
+        }
+      </div>
+
+  <div class="acciones">
+        <button type="submit" [disabled]="guardando">
+          @if (guardando) {
+            Guardando...
+          } @else {
+            {{ modoEdicion ? 'Guardar cambios' : 'Crear auto' }}
+          }
+        </button>
+
+        <a routerLink="/autos">Cancelar</a>
+      </div>
+    </form>
+  }
+
+ @if (mensajeExito) {
+    <p class="mensaje-exito">{{ mensajeExito }}</p>
+  }
+
+  @if (mensajeError) {
+    <p class="mensaje-error">{{ mensajeError }}</p>
+  }
+</section>
